@@ -30,8 +30,9 @@ body {
 .app-container {
   width: 100%;
   max-width: 680px;
-  height: 90vh;
-  max-height: 850px;
+  height: 96vh;
+  height: min(96dvh, 1050px);
+  max-height: 1050px;
   background: var(--bg-card);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
