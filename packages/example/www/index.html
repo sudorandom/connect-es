@@ -3,14 +3,53 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Connect-Web example</title>
+    <title>Connect RPC Eliza Demo</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="style.css" />
   </head>
   <body>
-    <header>
-      <h1>Eliza</h1>
-    </header>
-    <section id="root"></section>
+    <div class="app-container">
+      <header>
+        <div class="brand">
+          <div class="logo-icon">⚡</div>
+          <div>
+            <h1>Connect RPC</h1>
+            <p class="subtitle">WebTransport & WebSocket Transport Demo</p>
+          </div>
+        </div>
+        <div class="controls-bar" id="controls"></div>
+      </header>
+
+      <div class="sub-toolbar">
+        <div class="tab-switcher">
+          <button id="tab-btn-chat" class="tab-btn active">💬 Eliza Chat</button>
+          <button id="tab-btn-streams" class="tab-btn">⚡ Concurrent Streams</button>
+        </div>
+      </div>
+
+      <main class="chat-viewport">
+        <!-- View 1: Eliza Chat -->
+        <div id="view-chat" class="view-panel active">
+          <div id="messages" class="messages-list"></div>
+          <div id="input-container" class="input-container"></div>
+        </div>
+
+        <!-- View 2: Concurrent Bidi Stream Visualizer -->
+        <div id="view-streams" class="view-panel">
+          <div class="streams-header">
+            <div class="streams-info">
+              <h3>Concurrent WebSocket Streams</h3>
+              <p>Each lane below opens an independent WebSocket connection.</p>
+            </div>
+            <button id="toggle-streams-btn" class="btn-primary">▶ Start All Streams</button>
+          </div>
+          <div id="lanes-container" class="lanes-container"></div>
+        </div>
+      </main>
+    </div>
+
     <script type="module" src="webclient.js"></script>
   </body>
 </html>

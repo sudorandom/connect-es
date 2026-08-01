@@ -115,3 +115,8 @@ export type { UniversalHandlerOptions } from "./universal-handler.js";
 export type { ProtocolHandlerFactory } from "./protocol-handler-factory.js";
 export type { CommonTransportOptions } from "./transport-options.js";
 export { mergeNonProtocolHeaders } from "./protocol-headers.js";
+export {
+  HeaderSchema,
+  HeadersSchema,
+  EndStreamSchema,
+} from "../protocol-grpc/gen/connectrpc/frame/v1/frame_pb.js";

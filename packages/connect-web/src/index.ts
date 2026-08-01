@@ -14,5 +14,9 @@
 
 export { createConnectTransport } from "./connect-transport.js";
 export { createGrpcWebTransport } from "./grpc-web-transport.js";
+export { createConnectWebTransportTransport } from "./connect-webtransport-transport.js";
+export { createConnectWebSocketTransport } from "./connect-websocket-transport.js";
+export { createCompositeTransport } from "./composite-transport.js";
 export type { ConnectTransportOptions } from "./connect-transport.js";
 export type { GrpcWebTransportOptions } from "./grpc-web-transport.js";
+export type { ConnectWebTransportTransportOptions } from "./connect-webtransport-transport.js";

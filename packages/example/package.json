@@ -9,7 +9,9 @@
     "generate": "buf generate",
     "format": "biome format --write",
     "license-header": "license-header",
-    "lint": "biome lint --error-on-warnings"
+    "lint": "biome lint --error-on-warnings",
+    "build:web": "esbuild src/webclient.ts --bundle --format=esm --outfile=www/webclient.js",
+    "start:web": "npm run build:web && http-server www -p 8080 -c-1 --cors"
   },
   "engines": {
     "node": ">=20"
@@ -24,6 +26,7 @@
     "@bufbuild/buf": "^1.66.1",
     "@bufbuild/protoc-gen-es": "^2.10.0",
     "esbuild": "^0.19.8",
+    "http-server": "^14.1.1",
     "typescript": "^5.9.3"
   }
 }
