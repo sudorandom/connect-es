@@ -18,20 +18,20 @@ import type {
 } from "@connectrpc/connect";
 import { Code, ConnectError, createContextValues } from "@connectrpc/connect";
 import {
+  compressedFlag,
   createClientMethodSerializers,
   createMethodUrl,
   encodeEnvelope,
   runStreamingCall,
 } from "@connectrpc/connect/protocol";
-import { requestHeader } from "@connectrpc/connect/protocol-connect";
 import {
-  runWebTransportCall,
-  endStreamFromBinary,
-} from "./webtransport-helper.js";
+  endStreamFlag,
+  endStreamFromJson,
+  requestHeader,
+} from "@connectrpc/connect/protocol-connect";
+import { runWebTransportCall } from "./webtransport-helper.js";
 
 const flagEnvelopeData = 0x00;
-const flagEnvelopeCompressed = 0x01;
-const flagEnvelopeEndStream = 0x02;
 const flagEnvelopeHeaders = 0x04;
 
 export interface ConnectWebSocketTransportOptions {
@@ -123,7 +123,7 @@ export function createConnectWebSocketTransport(
             },
             close() {
               socket.send(
-                encodeEnvelope(flagEnvelopeEndStream, new Uint8Array()),
+                encodeEnvelope(endStreamFlag, new Uint8Array()),
               );
             },
             abort() {
@@ -156,8 +156,8 @@ export function createConnectWebSocketTransport(
           async function* iterate() {
             try {
               for await (const env of responseMessages) {
-                if (env.flags === flagEnvelopeEndStream) {
-                  const { error, metadata } = endStreamFromBinary(env.data);
+                if (env.flags === endStreamFlag) {
+                  const { error, metadata } = endStreamFromJson(env.data);
                   metadata.forEach((val, key) =>
                     responseTrailers.append(key, val),
                   );
@@ -168,7 +168,7 @@ export function createConnectWebSocketTransport(
                 }
                 if (
                   env.flags !== flagEnvelopeData &&
-                  env.flags !== flagEnvelopeCompressed
+                  env.flags !== compressedFlag
                 ) {
                   throw new ConnectError(
                     `protocol error: unexpected envelope flag 0x${env.flags.toString(16)}`,

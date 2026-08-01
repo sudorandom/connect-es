@@ -118,5 +118,4 @@ export { mergeNonProtocolHeaders } from "./protocol-headers.js";
 export {
   HeaderSchema,
   HeadersSchema,
-  EndStreamSchema,
 } from "../protocol-grpc/gen/connectrpc/frame/v1/frame_pb.js";

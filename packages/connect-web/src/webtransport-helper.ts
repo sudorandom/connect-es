@@ -13,7 +13,6 @@
 // limitations under the License.
 
 import { Code, ConnectError } from "@connectrpc/connect";
-import { codeFromString } from "@connectrpc/connect/protocol-connect";
 import { create, toBinary, fromBinary } from "@bufbuild/protobuf";
 import {
   createEnvelopeReadableStream,
@@ -21,7 +20,6 @@ import {
   type EnvelopedMessage,
   HeaderSchema,
   HeadersSchema,
-  EndStreamSchema,
 } from "@connectrpc/connect/protocol";
 
 export interface WebTransportSession {
@@ -115,34 +113,4 @@ export async function runWebTransportCall(
     responseHeaders,
     responseMessages: readResponseBody(),
   };
-}
-
-export function endStreamFromBinary(data: Uint8Array): {
-  error?: ConnectError;
-  metadata: Headers;
-} {
-  const protoEnd = fromBinary(EndStreamSchema, data);
-  const metadata = new Headers();
-  if (protoEnd.metadata) {
-    for (const field of protoEnd.metadata.fields) {
-      for (const val of field.values) {
-        metadata.append(field.key, val);
-      }
-    }
-  }
-
-  let error: ConnectError | undefined;
-  if (protoEnd.error) {
-    const code = codeFromString(protoEnd.error.code) ?? Code.Unknown;
-    error = new ConnectError(protoEnd.error.message, code);
-    error.isWireError = true;
-    if (protoEnd.error.details.length > 0) {
-      error.details = protoEnd.error.details.map((detail) => ({
-        type: detail.typeUrl,
-        value: detail.value,
-      }));
-    }
-  }
-
-  return { error, metadata };
 }

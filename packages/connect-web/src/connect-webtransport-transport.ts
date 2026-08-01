@@ -33,21 +33,21 @@ import type {
 } from "@connectrpc/connect";
 import { Code, ConnectError, createContextValues } from "@connectrpc/connect";
 import {
+  compressedFlag,
   createClientMethodSerializers,
   createMethodUrl,
   runStreamingCall,
   runUnaryCall,
 } from "@connectrpc/connect/protocol";
-import { requestHeader } from "@connectrpc/connect/protocol-connect";
-import type { WebTransportSession } from "./webtransport-helper.js";
 import {
-  runWebTransportCall,
-  endStreamFromBinary,
-} from "./webtransport-helper.js";
+  endStreamFlag,
+  endStreamFromJson,
+  requestHeader,
+} from "@connectrpc/connect/protocol-connect";
+import type { WebTransportSession } from "./webtransport-helper.js";
+import { runWebTransportCall } from "./webtransport-helper.js";
 
 const flagEnvelopeData = 0x00;
-const flagEnvelopeCompressed = 0x01;
-const flagEnvelopeEndStream = 0x02;
 const flagEnvelopeHeaders = 0x04;
 
 export interface ConnectWebTransportTransportOptions {
@@ -151,7 +151,7 @@ export function createConnectWebTransportTransport(
           for await (const env of responseMessages) {
             if (
               env.flags === flagEnvelopeData ||
-              env.flags === flagEnvelopeCompressed
+              env.flags === compressedFlag
             ) {
               if (responseMessage !== undefined) {
                 throw new ConnectError(
@@ -160,9 +160,9 @@ export function createConnectWebTransportTransport(
                 );
               }
               responseMessage = env.data;
-            } else if (env.flags === flagEnvelopeEndStream) {
+            } else if (env.flags === endStreamFlag) {
               endStreamReceived = true;
-              const endStream = endStreamFromBinary(env.data);
+              const endStream = endStreamFromJson(env.data);
               if (endStream.error) {
                 const error = endStream.error;
                 responseHeaders.forEach((value, key) => {
@@ -278,12 +278,12 @@ export function createConnectWebTransportTransport(
             for await (const env of responseMessages) {
               if (
                 env.flags === flagEnvelopeData ||
-                env.flags === flagEnvelopeCompressed
+                env.flags === compressedFlag
               ) {
                 yield parse(env.data);
-              } else if (env.flags === flagEnvelopeEndStream) {
+              } else if (env.flags === endStreamFlag) {
                 endStreamReceived = true;
-                const endStream = endStreamFromBinary(env.data);
+                const endStream = endStreamFromJson(env.data);
                 if (endStream.error) {
                   const error = endStream.error;
                   responseHeaders.forEach((value, key) => {

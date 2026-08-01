@@ -18,15 +18,13 @@
 
 import type { GenFile, GenMessage } from "@bufbuild/protobuf/codegenv2";
 import { fileDesc, messageDesc } from "@bufbuild/protobuf/codegenv2";
-import type { Any } from "@bufbuild/protobuf/wkt";
-import { file_google_protobuf_any } from "@bufbuild/protobuf/wkt";
 import type { Message } from "@bufbuild/protobuf";
 
 /**
  * Describes the file connectrpc/frame/v1/frame.proto.
  */
 export const file_connectrpc_frame_v1_frame: GenFile = /*@__PURE__*/
-  fileDesc("Ch9jb25uZWN0cnBjL2ZyYW1lL3YxL2ZyYW1lLnByb3RvEhNjb25uZWN0cnBjLmZyYW1lLnYxIiUKBkhlYWRlchILCgNrZXkYASABKAkSDgoGdmFsdWVzGAIgAygJIjYKB0hlYWRlcnMSKwoGZmllbGRzGAEgAygLMhsuY29ubmVjdHJwYy5mcmFtZS52MS5IZWFkZXIiTQoFRXJyb3ISDAoEY29kZRgBIAEoCRIPCgdtZXNzYWdlGAIgASgJEiUKB2RldGFpbHMYAyADKAsyFC5nb29nbGUucHJvdG9idWYuQW55ImYKCUVuZFN0cmVhbRIpCgVlcnJvchgBIAEoCzIaLmNvbm5lY3RycGMuZnJhbWUudjEuRXJyb3ISLgoIbWV0YWRhdGEYAiABKAsyHC5jb25uZWN0cnBjLmZyYW1lLnYxLkhlYWRlcnNCQVo/Y29ubmVjdHJwYy5jb20vY29ubmVjdC92Mi9pbnRlcm5hbC9nZW4vY29ubmVjdC9mcmFtZS92MTtmcmFtZXYxYgZwcm90bzM", [file_google_protobuf_any]);
+  fileDesc("Ch9jb25uZWN0cnBjL2ZyYW1lL3YxL2ZyYW1lLnByb3RvEhNjb25uZWN0cnBjLmZyYW1lLnYxIiUKBkhlYWRlchILCgNrZXkYASABKAkSDgoGdmFsdWVzGAIgAygJIjYKB0hlYWRlcnMSKwoGZmllbGRzGAEgAygLMhsuY29ubmVjdHJwYy5mcmFtZS52MS5IZWFkZXJCQVo/Y29ubmVjdHJwYy5jb20vY29ubmVjdC92Mi9pbnRlcm5hbC9nZW4vY29ubmVjdC9mcmFtZS92MTtmcmFtZXYxYgZwcm90bzM");
 
 /**
  * @generated from message connectrpc.frame.v1.Header
@@ -66,53 +64,4 @@ export type Headers = Message<"connectrpc.frame.v1.Headers"> & {
  */
 export const HeadersSchema: GenMessage<Headers> = /*@__PURE__*/
   messageDesc(file_connectrpc_frame_v1_frame, 1);
-
-/**
- * @generated from message connectrpc.frame.v1.Error
- */
-export type Error = Message<"connectrpc.frame.v1.Error"> & {
-  /**
-   * @generated from field: string code = 1;
-   */
-  code: string;
-
-  /**
-   * @generated from field: string message = 2;
-   */
-  message: string;
-
-  /**
-   * @generated from field: repeated google.protobuf.Any details = 3;
-   */
-  details: Any[];
-};
-
-/**
- * Describes the message connectrpc.frame.v1.Error.
- * Use `create(ErrorSchema)` to create a new message.
- */
-export const ErrorSchema: GenMessage<Error> = /*@__PURE__*/
-  messageDesc(file_connectrpc_frame_v1_frame, 2);
-
-/**
- * @generated from message connectrpc.frame.v1.EndStream
- */
-export type EndStream = Message<"connectrpc.frame.v1.EndStream"> & {
-  /**
-   * @generated from field: connectrpc.frame.v1.Error error = 1;
-   */
-  error?: Error;
-
-  /**
-   * @generated from field: connectrpc.frame.v1.Headers metadata = 2;
-   */
-  metadata?: Headers;
-};
-
-/**
- * Describes the message connectrpc.frame.v1.EndStream.
- * Use `create(EndStreamSchema)` to create a new message.
- */
-export const EndStreamSchema: GenMessage<EndStream> = /*@__PURE__*/
-  messageDesc(file_connectrpc_frame_v1_frame, 3);
 

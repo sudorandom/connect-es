@@ -16,8 +16,6 @@ syntax = "proto3";
 
 package connectrpc.frame.v1;
 
-import "google/protobuf/any.proto";
-
 option go_package = "connectrpc.com/connect/v2/internal/gen/connect/frame/v1;framev1";
 
 message Header {
@@ -27,15 +25,4 @@ message Header {
 
 message Headers {
   repeated Header fields = 1;
-}
-
-message Error {
-  string code = 1;
-  string message = 2;
-  repeated google.protobuf.Any details = 3;
-}
-
-message EndStream {
-  Error error = 1;
-  Headers metadata = 2;
 }

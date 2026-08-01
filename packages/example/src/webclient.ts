@@ -31,6 +31,9 @@ const viewChat = document.querySelector<HTMLElement>("#view-chat")!;
 const viewStreams = document.querySelector<HTMLElement>("#view-streams")!;
 const lanesContainer = document.querySelector<HTMLElement>("#lanes-container")!;
 const toggleStreamsBtn = document.querySelector<HTMLButtonElement>("#toggle-streams-btn")!;
+const laneTransportDescription = document.querySelector<HTMLElement>(
+  "#lane-transport-description"
+)!;
 
 const transportSelect = document.createElement("select");
 transportSelect.innerHTML = `
@@ -44,6 +47,8 @@ let transport: any = null;
 function setupTransport() {
   const choice = transportSelect.value;
   if (choice === "webtransport") {
+    laneTransportDescription.innerText =
+      "Each lane below opens an independent bidirectional QUIC stream multiplexed within one WebTransport session over HTTP/3.";
     console.log("Using WebTransport via CompositeTransport!");
     const session = new WebTransport("https://localhost:4433/webtransport");
     transport = createCompositeTransport(
@@ -54,6 +59,8 @@ function setupTransport() {
       })
     );
   } else {
+    laneTransportDescription.innerText =
+      "Each lane below opens an independent WebSocket connection.";
     console.log("Using WebSocket with a dedicated connection per RPC!");
     transport = createCompositeTransport(
       createConnectTransport({ baseUrl: "https://localhost:4433" }),
@@ -320,7 +327,7 @@ toggleStreamsBtn.onclick = () => {
     toggleStreamsBtn.classList.remove("active");
     toggleStreamsBtn.innerText = "▶ Start All Streams";
   } else {
-    // Start 4 concurrent bidi streams, each on its own WebSocket connection
+    // Start four concurrent bidi RPCs using the selected streaming transport.
     globalStreamsRunning = true;
     toggleStreamsBtn.classList.add("active");
     toggleStreamsBtn.innerText = "⏹ Stop All Streams";
