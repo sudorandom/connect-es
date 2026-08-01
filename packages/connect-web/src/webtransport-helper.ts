@@ -13,13 +13,10 @@
 // limitations under the License.
 
 import { Code, ConnectError } from "@connectrpc/connect";
-import { create, toBinary, fromBinary } from "@bufbuild/protobuf";
 import {
   createEnvelopeReadableStream,
   encodeEnvelope,
   type EnvelopedMessage,
-  HeaderSchema,
-  HeadersSchema,
 } from "@connectrpc/connect/protocol";
 
 export interface WebTransportSession {
@@ -47,13 +44,16 @@ export async function runWebTransportCall(
   const writer = stream.writable.getWriter();
 
   // Write request headers
-  const fields = [];
+  const metadata: Record<string, string[]> = {};
   requestHeaders.forEach((value, key) => {
-    fields.push(create(HeaderSchema, { key, values: [value] }));
+    if (!metadata[key]) {
+      metadata[key] = [];
+    }
+    metadata[key].push(value);
   });
-  fields.push(create(HeaderSchema, { key: ":path", values: [path] }));
-  const protoHeaders = create(HeadersSchema, { fields });
-  const headersBytes = toBinary(HeadersSchema, protoHeaders);
+  metadata[":path"] = [path];
+  const encoder = new TextEncoder();
+  const headersBytes = encoder.encode(JSON.stringify({ metadata }));
   await writer.write(encodeEnvelope(writeHeaderFlag, headersBytes));
 
   // Write request messages asynchronously so we can read the response concurrently
@@ -64,10 +64,13 @@ export async function runWebTransportCall(
       }
       await writer.close();
     } catch (err) {
-      await writer.abort(err);
+      await writer.abort(err).catch(() => {});
       throw err;
+    } finally {
+      writer.releaseLock();
     }
   })();
+  writePromise.catch(() => {});
 
   const envReader = createEnvelopeReadableStream(stream.readable).getReader();
   const firstResult = await envReader.read();
@@ -86,11 +89,20 @@ export async function runWebTransportCall(
       Code.Internal,
     );
   }
-  const protoRespHeaders = fromBinary(HeadersSchema, firstEnv.data);
+  const decoder = new TextDecoder();
+  const parsedHeaderObj = JSON.parse(decoder.decode(firstEnv.data)) as {
+    metadata?: Record<string, string[] | string>;
+  };
   const responseHeaders = new Headers();
-  for (const field of protoRespHeaders.fields) {
-    for (const val of field.values) {
-      responseHeaders.append(field.key, val);
+  if (parsedHeaderObj.metadata) {
+    for (const [key, val] of Object.entries(parsedHeaderObj.metadata)) {
+      if (Array.isArray(val)) {
+        for (const v of val) {
+          responseHeaders.append(key, v);
+        }
+      } else if (typeof val === "string") {
+        responseHeaders.append(key, val);
+      }
     }
   }
 
