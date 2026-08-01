@@ -138,7 +138,7 @@ export function endStreamFromBinary(data: Uint8Array): {
     error.isWireError = true;
     if (protoEnd.error.details.length > 0) {
       error.details = protoEnd.error.details.map((detail) => ({
-        type: detail.type,
+        type: detail.typeUrl,
         value: detail.value,
       }));
     }
