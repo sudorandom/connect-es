@@ -24,28 +24,47 @@
 
       <div class="sub-toolbar">
         <div class="tab-switcher">
-          <button id="tab-btn-chat" class="tab-btn active">💬 Eliza Chat</button>
+          <button id="tab-btn-unary" class="tab-btn active">💬 Eliza Chat (Unary)</button>
+          <button id="tab-btn-chat" class="tab-btn">🌊 Streaming Chat</button>
           <button id="tab-btn-streams" class="tab-btn">⚡ Concurrent Streams</button>
         </div>
       </div>
 
       <main class="chat-viewport">
-        <!-- View 1: Eliza Chat -->
-        <div id="view-chat" class="view-panel active">
+        <!-- View 1: Unary Chat -->
+        <div id="view-unary" class="view-panel active">
+          <div id="unary-messages" class="messages-list"></div>
+          <div id="unary-input-container" class="input-container">
+            <input id="unary-input" class="chat-input" placeholder="Type your message to Eliza..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" />
+          </div>
+        </div>
+
+        <!-- View 2: Eliza Chat (Streaming) -->
+        <div id="view-chat" class="view-panel">
+          <div class="streams-header" style="flex-direction: column; align-items: stretch; gap: 0.75rem; border-radius: 0; border-left: none; border-right: none; border-top: none;">
+            <div class="streams-info">
+              <h3>Streaming Chat</h3>
+              <p style="font-size: 0.85rem; color: var(--text-muted, #94a3b8);">Stateful BIDI streaming (`Converse` & `Introduce`)</p>
+            </div>
+            <div id="controls-chat" class="controls-bar" style="margin: 0; padding: 0; border: none; width: 100%;"></div>
+          </div>
           <div id="messages" class="messages-list"></div>
           <div id="input-container" class="input-container"></div>
         </div>
 
-        <!-- View 2: Concurrent Bidi Stream Visualizer -->
+        <!-- View 3: Concurrent Bidi Stream Visualizer -->
         <div id="view-streams" class="view-panel">
-          <div class="streams-header">
-            <div class="streams-info">
-              <h3>Concurrent RPC Streams</h3>
-              <p id="lane-transport-description">
-                Each lane below opens an independent WebSocket connection.
-              </p>
+          <div class="streams-header" style="flex-direction: column; align-items: stretch; gap: 0.75rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <div class="streams-info">
+                <h3>Concurrent RPC Streams</h3>
+                <p id="lane-transport-description">
+                  Each lane below opens an independent stream.
+                </p>
+              </div>
+              <button id="toggle-streams-btn" class="btn-primary">▶ Start All Streams</button>
             </div>
-            <button id="toggle-streams-btn" class="btn-primary">▶ Start All Streams</button>
+            <div id="controls-streams" class="controls-bar" style="margin: 0; padding: 0; border: none; width: 100%;"></div>
           </div>
           <div id="lanes-container" class="lanes-container"></div>
         </div>

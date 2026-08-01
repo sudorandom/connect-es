@@ -88,9 +88,11 @@ h1 {
   display: flex;
   align-items: center;
   gap: 0.75rem;
+  width: 100%;
 }
 
 .controls-bar select {
+  width: 100%;
   appearance: none;
   background: var(--bg-input);
   color: var(--text-main);

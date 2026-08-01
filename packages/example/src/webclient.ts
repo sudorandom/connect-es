@@ -21,12 +21,12 @@ import {
 } from "@connectrpc/connect-web";
 import { ElizaService } from "./gen/eliza_pb.js";
 
-// DOM Elements
-const controls = document.querySelector<HTMLElement>("#controls")!;
 const messagesList = document.querySelector<HTMLElement>("#messages")!;
 const inputContainer = document.querySelector<HTMLElement>("#input-container")!;
+const tabBtnUnary = document.querySelector<HTMLElement>("#tab-btn-unary")!;
 const tabBtnChat = document.querySelector<HTMLElement>("#tab-btn-chat")!;
 const tabBtnStreams = document.querySelector<HTMLElement>("#tab-btn-streams")!;
+const viewUnary = document.querySelector<HTMLElement>("#view-unary")!;
 const viewChat = document.querySelector<HTMLElement>("#view-chat")!;
 const viewStreams = document.querySelector<HTMLElement>("#view-streams")!;
 const lanesContainer = document.querySelector<HTMLElement>("#lanes-container")!;
@@ -35,20 +35,31 @@ const laneTransportDescription = document.querySelector<HTMLElement>(
   "#lane-transport-description"
 )!;
 
-const transportSelect = document.createElement("select");
-transportSelect.innerHTML = `
+const controlsChat = document.querySelector<HTMLElement>("#controls-chat")!;
+const controlsStreams = document.querySelector<HTMLElement>("#controls-streams")!;
+
+const transportSelectChat = document.createElement("select");
+transportSelectChat.innerHTML = `
   <option value="webtransport">WebTransport (HTTP/3 Session)</option>
   <option value="websocket">WebSocket (Connection per RPC)</option>
 `;
-controls.append(transportSelect);
+if (controlsChat) controlsChat.append(transportSelectChat);
+
+const transportSelectStreams = document.createElement("select");
+transportSelectStreams.innerHTML = `
+  <option value="webtransport">WebTransport (HTTP/3 Session)</option>
+  <option value="websocket">WebSocket (Connection per RPC)</option>
+`;
+if (controlsStreams) controlsStreams.append(transportSelectStreams);
 
 let transport: any = null;
 
-function setupTransport() {
-  const choice = transportSelect.value;
+function setupTransport(choice: string = "webtransport") {
   if (choice === "webtransport") {
-    laneTransportDescription.innerText =
-      "Each lane below opens an independent bidirectional QUIC stream multiplexed within one WebTransport session over HTTP/3.";
+    if (laneTransportDescription) {
+      laneTransportDescription.innerText =
+        "Each lane below opens an independent bidirectional QUIC stream multiplexed within one WebTransport session over HTTP/3.";
+    }
     console.log("Using WebTransport via CompositeTransport!");
     const session = new WebTransport("https://localhost:4433/webtransport");
     transport = createCompositeTransport(
@@ -59,8 +70,10 @@ function setupTransport() {
       })
     );
   } else {
-    laneTransportDescription.innerText =
-      "Each lane below opens an independent WebSocket connection.";
+    if (laneTransportDescription) {
+      laneTransportDescription.innerText =
+        "Each lane below opens an independent WebSocket connection.";
+    }
     console.log("Using WebSocket with a dedicated connection per RPC!");
     transport = createCompositeTransport(
       createConnectTransport({ baseUrl: "https://localhost:4433" }),
@@ -70,7 +83,7 @@ function setupTransport() {
     );
   }
 }
-setupTransport();
+setupTransport(transportSelectChat.value);
 
 const dynamicTransport = {
   unary: (...args: any[]) => transport.unary(...args),
@@ -80,19 +93,92 @@ const dynamicTransport = {
 const client = createClient(ElizaService, dynamicTransport as any);
 
 // Tab Navigation Logic
+tabBtnUnary.onclick = () => {
+  tabBtnUnary.classList.add("active");
+  tabBtnChat.classList.remove("active");
+  tabBtnStreams.classList.remove("active");
+  viewUnary.classList.add("active");
+  viewChat.classList.remove("active");
+  viewStreams.classList.remove("active");
+};
+
 tabBtnChat.onclick = () => {
   tabBtnChat.classList.add("active");
+  tabBtnUnary.classList.remove("active");
   tabBtnStreams.classList.remove("active");
   viewChat.classList.add("active");
+  viewUnary.classList.remove("active");
   viewStreams.classList.remove("active");
 };
 
 tabBtnStreams.onclick = () => {
   tabBtnStreams.classList.add("active");
+  tabBtnUnary.classList.remove("active");
   tabBtnChat.classList.remove("active");
   viewStreams.classList.add("active");
+  viewUnary.classList.remove("active");
   viewChat.classList.remove("active");
   renderStreamLanes();
+};
+
+// --- View 1: Unary Chat (`Say`) ---
+const unaryInput = document.querySelector<HTMLInputElement>("#unary-input")!;
+const unaryMessages = document.querySelector<HTMLElement>("#unary-messages")!;
+
+void (async () => {
+  const initDiv = document.createElement("div");
+  initDiv.className = "msg-bubble msg-eliza";
+  initDiv.innerText = "What is your name?";
+  unaryMessages.append(initDiv);
+})();
+
+let unaryNameSet = false;
+
+unaryInput.onkeyup = async (ev) => {
+  if (ev.key === "Enter" && unaryInput.value.trim().length > 0) {
+    const text = unaryInput.value.trim();
+    unaryInput.value = "";
+
+    const userDiv = document.createElement("div");
+    userDiv.className = "msg-bubble msg-user";
+    userDiv.innerText = text;
+    unaryMessages.append(userDiv);
+    unaryMessages.scrollTop = unaryMessages.scrollHeight;
+
+    if (!unaryNameSet) {
+      unaryNameSet = true;
+      try {
+        const res = await client.say({ sentence: text });
+        const elizaDiv = document.createElement("div");
+        elizaDiv.className = "msg-bubble msg-eliza";
+        elizaDiv.innerText = `Hi ${text}! ${res.sentence}`;
+        unaryMessages.append(elizaDiv);
+        unaryMessages.scrollTop = unaryMessages.scrollHeight;
+      } catch (e) {
+        const sysDiv = document.createElement("div");
+        sysDiv.className = "msg-bubble msg-system";
+        sysDiv.innerText = "Say error: " + String(e);
+        unaryMessages.append(sysDiv);
+        unaryMessages.scrollTop = unaryMessages.scrollHeight;
+      }
+      return;
+    }
+
+    try {
+      const res = await client.say({ sentence: text });
+      const elizaDiv = document.createElement("div");
+      elizaDiv.className = "msg-bubble msg-eliza";
+      elizaDiv.innerText = res.sentence;
+      unaryMessages.append(elizaDiv);
+      unaryMessages.scrollTop = unaryMessages.scrollHeight;
+    } catch (e) {
+      const sysDiv = document.createElement("div");
+      sysDiv.className = "msg-bubble msg-system";
+      sysDiv.innerText = "Say error: " + String(e);
+      unaryMessages.append(sysDiv);
+      unaryMessages.scrollTop = unaryMessages.scrollHeight;
+    }
+  }
 };
 
 // --- View 1: Eliza Chat ---
@@ -128,9 +214,10 @@ void (async () => {
     }
   }
 
-  transportSelect.onchange = async () => {
-    setupTransport();
-    print("[System] Switched transport to " + transportSelect.value);
+  transportSelectChat.onchange = async () => {
+    transportSelectStreams.value = transportSelectChat.value;
+    setupTransport(transportSelectChat.value);
+    print("[System] Switched transport to " + transportSelectChat.value);
     
     try {
       for await (const res of client.introduce({ name: "Demo User" })) {
@@ -141,6 +228,11 @@ void (async () => {
     }
     
     startChat();
+  };
+
+  transportSelectStreams.onchange = () => {
+    transportSelectChat.value = transportSelectStreams.value;
+    setupTransport(transportSelectStreams.value);
   };
 
   print("What is your name?");
@@ -176,6 +268,10 @@ function print(text: string): void {
 function prompt(signal?: AbortSignal): Promise<string> {
   const input = document.createElement("input");
   input.classList.add("chat-input");
+  input.setAttribute("autocomplete", "off");
+  input.setAttribute("autocorrect", "off");
+  input.setAttribute("autocapitalize", "off");
+  input.setAttribute("spellcheck", "false");
   input.placeholder = "Type your message and press Enter...";
   input.value = "";
   inputContainer.innerHTML = "";
